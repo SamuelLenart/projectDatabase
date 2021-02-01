@@ -13,6 +13,6 @@ public class Main {
         Output out = new Output();
         Country country = database.getCountryInfo("Turkey");
         out.printCountryInfo(country);
-        List cities = (List) database.getCities("Japan");
+        List<City> cities = database.getCities("Japan");
     }
 }
