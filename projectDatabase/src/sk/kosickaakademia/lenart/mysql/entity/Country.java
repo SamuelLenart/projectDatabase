@@ -1,5 +1,8 @@
 package sk.kosickaakademia.lenart.mysql.entity;
 
+
+import java.util.List;
+
 public class Country {
 
     private String name;
@@ -7,13 +10,15 @@ public class Country {
     private String capital;
     private int area;
     private String continent;
+    private List<String> languages;
 
-    public Country(String name, String code, String capital, int area, String continent) {
+    public Country(String name, String code, String capital, int area, String continent, List languages) {
         this.name = name;
         this.code = code;
         this.capital = capital;
         this.area = area;
         this.continent = continent;
+        this.languages = languages;
     }
 
     public String getName() {
@@ -34,5 +39,9 @@ public class Country {
 
     public String getContinent() {
         return continent;
+    }
+
+    public List<String> getLanguages() {
+        return getLanguages();
     }
 }

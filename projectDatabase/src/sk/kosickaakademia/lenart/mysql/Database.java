@@ -53,14 +53,17 @@ public class Database {
     }
         public Country getCountryInfo (String country){
             String query = "SELECT country.Name, Code, city.Name, " +
+                    "Language, " +
                     "JSON_UNQUOTE(JSON_EXTRACT(doc, '$.geography.Continent')) AS Continent, " +
                     "JSON_EXTRACT(doc, '$.geography.SurfaceArea') AS SurfaceArea " +
                     "FROM country " +
                     "INNER JOIN city ON city.ID = country.Capital " +
                     "INNER JOIN countryinfo ON country.Code = countryinfo._id " +
-                    "WHERE country.Name LIKE ?";
+                    "INNER JOIN countrylanguage ON country.Code = countrylanguage.CountryCode " +
+                    "WHERE country.Name LIKE ? AND IsOfficial = 'T'";
 
             Country countryInfo = null;
+            List<String> languages = new ArrayList<>();
             try {
                 Connection connection = getConnection();
                 PreparedStatement ps = connection.prepareStatement(query);
@@ -70,9 +73,10 @@ public class Database {
                     String code3 = rs.getString("Code");
                     String capital = rs.getString("city.Name");
                     String continent = rs.getString("Continent");
+                    languages.add(rs.getString("Language"));
                     int area = rs.getInt("SurfaceArea");
-                    System.out.println(code3 + " " + capital + " " + continent + " " + area);
-                    countryInfo = new Country(country, code3, capital, area, continent);
+                    System.out.println(code3 + " " + capital + " " + continent + " " + area + " " + languages);
+                    countryInfo = new Country(country, code3, capital, area, continent, languages);
                 }
 
             } catch (Exception e) {
