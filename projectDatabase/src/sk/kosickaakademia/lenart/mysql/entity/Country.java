@@ -6,15 +6,15 @@ import java.util.List;
 public class Country {
 
     private String name;
-    private String code;
+    private String code3;
     private String capital;
     private int area;
     private String continent;
     private List<String> languages;
 
-    public Country(String name, String code, String capital, int area, String continent, List languages) {
+    public Country(String name, String code3, String capital, int area, String continent, List languages) {
         this.name = name;
-        this.code = code;
+        this.code3 = code3;
         this.capital = capital;
         this.area = area;
         this.continent = continent;
@@ -25,8 +25,8 @@ public class Country {
         return name;
     }
 
-    public String getCode() {
-        return code;
+    public String getCode3() {
+        return code3;
     }
 
     public String getCapital() {
