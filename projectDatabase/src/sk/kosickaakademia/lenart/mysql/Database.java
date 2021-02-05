@@ -2,6 +2,7 @@ package sk.kosickaakademia.lenart.mysql;
 
 
 
+import sk.kosickaakademia.lenart.mysql.entity.CapitalCity;
 import sk.kosickaakademia.lenart.mysql.entity.City;
 import sk.kosickaakademia.lenart.mysql.entity.Country;
 
@@ -143,11 +144,11 @@ public class Database {
             Connection connection = getConnection();
             if (connection != null) {
                 if (isCityInCountry(city, country)) {
-                    System.out.println("\033[31mWrong country or city name!\033[0m");
+                    System.out.println("Wrong country or city name!");
                     return;
                 }
                 if (pop <= 0){
-                    System.out.println("\033[31mBad number!\033[0m");
+                    System.out.println("Bad number!");
                     return;
                 }
                 int previousPop = getPreviousPop(country, city);
@@ -176,5 +177,65 @@ public class Database {
         }
         return previousPop;
     }
+
+    public List<String> getCountryInContinent(String continent){
+        List<String> countries = new ArrayList<>();
+        if (continent == null || continent.equalsIgnoreCase("")){
+            System.out.println("Wrong continent");
+            return null;
+        }
+        String query = "SELECT JSON_EXTRACT(doc, '$._id') AS Code, JSON_EXTRACT(doc, '$.geography.Continent') AS Con " +
+                "FROM countryinfo " +
+                "WHERE JSON_EXTRACT(doc, '$.geography.Continent') = ?";
+        try {
+            Connection connection = getConnection();
+            if (connection != null){
+                PreparedStatement ps = connection.prepareStatement(query);
+                ps.setString(1 , continent);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()){
+                    countries.add(rs.getString("Code"));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return countries;
+    }
+
+    public CapitalCity getCapital(String countryCode){
+        if (countryCode == null || countryCode.equalsIgnoreCase(""))
+            return null;
+        String query = "SELECT Capital, country.Name, city.Name, JSON_EXTRACT(Info, '$.Population') AS Population " +
+                "FROM country " +
+                "INNER JOIN city ON country.Capital = city.ID " +
+                "WHERE country.Code LIKE ?";
+        try {
+            Connection connection = getConnection();
+            if (connection != null){
+                PreparedStatement ps = connection.prepareStatement(query);
+                ps.setString(1, countryCode);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    String name = rs.getString("city.Name");
+                    String country = rs.getString("country.Name");
+                    int pop = rs.getInt("Population");
+                    return new CapitalCity(name, country, pop);
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public List<CapitalCity> getCapitalCities(String continent){
+        List<CapitalCity> capitals = new ArrayList<>();
+        for (String country : getCountryInContinent(continent)){
+            capitals.add(getCapital(country.replace("\"", "")));
+        }
+        return capitals;
+    }
+
+    public void printCapitalCities(List <CapitalCity> list){
+        for (CapitalCity cap : list){
+            System.out.println(cap.getCountry() + " -> " + cap.getName() + " -> " + cap.getPopulation());
+        }
+    }
 }
-        
