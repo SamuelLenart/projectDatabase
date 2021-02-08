@@ -5,6 +5,7 @@ package sk.kosickaakademia.lenart.mysql;
 import sk.kosickaakademia.lenart.mysql.entity.CapitalCity;
 import sk.kosickaakademia.lenart.mysql.entity.City;
 import sk.kosickaakademia.lenart.mysql.entity.Country;
+import sk.kosickaakademia.lenart.mysql.entity.Monument;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -290,5 +291,34 @@ public class Database {
 
         return true;
     }
+    public List<Monument> getMonuments() {
 
+        List<Monument> monuments = new ArrayList<>();
+        try {
+            Connection connection = getConnection();
+            if(connection != null){
+
+                String query = "select monument.id as id, monument.name as name, city.Name as city, country.Name as country from monument inner join city on city.ID = monument.city inner join country on country.Code = city.CountryCode";
+
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while(resultSet.next()) {
+                    int id = resultSet.getInt("id");
+                    String name = resultSet.getString("name");
+                    String city = resultSet.getString("city");
+                    String country = resultSet.getString("country");
+                    Monument monument = new Monument(id, name, city, country);
+                    monuments.add(monument);
+                }
+                connection.close();
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return monuments;
+    }
 }
