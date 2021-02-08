@@ -10,6 +10,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static sk.kosickaakademia.lenart.mysql.Helper.Help.*;
+
 public class Database {
     private String url = "jdbc:mysql://localhost:3306/world_x";
     private String username = "root";
@@ -164,6 +166,26 @@ public class Database {
     }
 
     private boolean isCityInCountry(String city, String country) {
+        String query = "SELECT Name, CountryCode from city " +
+                "WHERE CountryCode LIKE ?";
+        try {
+            Connection connection = getConnection();
+            if (connection != null){
+                String code = getCountryCode(country);
+                if (code == null) {
+                    System.out.println("Wrong country name!");
+                    return false;
+                }
+                PreparedStatement ps = connection.prepareStatement(query);
+                ps.setString(1, code);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()){
+                    if (city.equalsIgnoreCase(rs.getString("Name")))
+                        return true;
+                }
+                connection.close();
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
 
@@ -238,4 +260,35 @@ public class Database {
             System.out.println(cap.getCountry() + " -> " + cap.getName() + " -> " + cap.getPopulation());
         }
     }
+    public boolean insertNewMonument( String code3, String city, String name ){
+        String query = "INSERT INTO monument(id, name, city) " +
+                "VALUES(?, ?, ?)";
+        if (city == null || code3 == null || code3.equalsIgnoreCase("") || city.equals("")){
+            System.out.println("Incorrect city or country!");
+            return false;
+        }
+        if (name == null || name.equals("")){
+            System.out.println("Incorrect name!");
+            return false;
+        }
+        if (!isCityInCountryCode(city, code3)){
+            System.out.println("Wrong country or city!");
+            return false;
+        }
+        try {
+            Connection connection = getConnection();
+            if (connection != null) {
+                PreparedStatement ps = connection.prepareStatement(query);
+                int monumentId = getMonumentId() + 1;
+                ps.setInt(1, monumentId);
+                ps.setString(2, name);
+                ps.setInt(3, getCityId(city));
+                ps.executeUpdate();
+                System.out.println("Added " + monumentId + ". " + name + " in " + city + " with ID: " + getCityId(city));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        return true;
+    }
+
 }

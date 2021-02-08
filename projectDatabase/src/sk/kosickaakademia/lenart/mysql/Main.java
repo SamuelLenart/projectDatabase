@@ -1,9 +1,11 @@
 package sk.kosickaakademia.lenart.mysql;
 
 
+import sk.kosickaakademia.lenart.mysql.Helper.Help;
 import sk.kosickaakademia.lenart.mysql.entity.CapitalCity;
 import sk.kosickaakademia.lenart.mysql.entity.City;
 import sk.kosickaakademia.lenart.mysql.entity.Country;
+import sk.kosickaakademia.lenart.mysql.entity.Monument;
 import sk.kosickaakademia.lenart.mysql.output.Output;
 
 import java.util.List;
@@ -24,5 +26,8 @@ public class Main {
         database.updatePopulation("Slovakia", "Ploske", 69);
         List<CapitalCity> capitalCityList = database.getCapitalCities("Europe");
         database.printCapitalCities(capitalCityList);
+
+        List<Monument> monuments = Help.getMonuments();
+        out.printMonuments(monuments);
     }
 }
