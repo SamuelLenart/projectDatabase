@@ -1,9 +1,5 @@
 package sk.kosickaakademia.lenart.mysql.Helper;
 
-import mysql.DatabaseID;
-import mysql.entity.City;
-import mysql.entity.Monument;
-
 import sk.kosickaakademia.lenart.mysql.entity.City;
 import sk.kosickaakademia.lenart.mysql.entity.Monument;
 
@@ -13,19 +9,20 @@ import java.util.List;
 
 
 public class Help {
-    public static Connection getConnection() throws ClassNotFoundException, SQLException {
+    private static Connection getConnection(String url, String username, String password) throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(DatabaseID.getUrl(), DatabaseID.getUsername(), DatabaseID.getPassword());
+        Connection con = DriverManager.getConnection(url, username, password);
+        return con;
     }
 
-    public static String getCountryCode(String country){
+    public static String getCountryCode(String country, String url, String username, String password){
         if (country == null || country.equalsIgnoreCase("")) {
             System.out.println("Wrong country name!");
             return null;
         }
         String query = "SELECT Code FROM country WHERE Name LIKE ?";
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null) {
                 PreparedStatement ps = connection.prepareStatement(query);
                 ps.setString(1, country);
@@ -42,7 +39,7 @@ public class Help {
         return null;
     }
 
-    public static List<City> getCities(String country){
+    public static List<City> getCities(String country, String url, String username, String password){
         //prepare statement
         List<City> cities = new ArrayList<>();
         String query = "SELECT city.Name, JSON_EXTRACT(Info, '$.Population') AS Population " +
@@ -50,7 +47,7 @@ public class Help {
                 "INNER JOIN country ON country.Code = city.CountryCode " +
                 "WHERE country.Name LIKE ? ORDER BY Population DESC";
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null) {
                 //make statement
                 PreparedStatement ps = connection.prepareStatement(query);
@@ -58,7 +55,7 @@ public class Help {
                 //store to ResultSet
                 ps.setString(1, country);
                 ResultSet rs = ps.executeQuery();
-                if (getCountryCode(country) == null){
+                if (getCountryCode(country, url, username, password) == null){
                     System.out.println("Wrong country!");
                     return null;
                 }
@@ -74,13 +71,13 @@ public class Help {
         return cities;
     }
 
-    public static boolean isCityInCountry(String city, String country){
+    public static boolean isCityInCountry(String city, String country, String url, String username, String password){
         String query = "SELECT Name, CountryCode from city " +
                 "WHERE CountryCode LIKE ?";
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null){
-                String code = getCountryCode(country);
+                String code = getCountryCode(country, url, username, password);
                 if (code == null) {
                     System.out.println("Wrong country name!");
                     return false;
@@ -98,7 +95,7 @@ public class Help {
         return false;
     }
 
-    public static boolean isCityInCountryCode(String city, String code3){
+    public static boolean isCityInCountryCode(String city, String code3, String url, String username, String password){
         String query = "SELECT Name, CountryCode from city " +
                 "WHERE CountryCode LIKE ?";
         if (code3 == null) {
@@ -106,7 +103,7 @@ public class Help {
             return false;
         }
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null){
 
                 PreparedStatement ps = connection.prepareStatement(query);
@@ -122,9 +119,9 @@ public class Help {
         return false;
     }
 
-    public static int getPreviousPop(String country, String city) {
+    public static int getPreviousPop(String country, String city, String username, String url, String password) {
         int previousPop = 0;
-        for (City city1 : getCities(country)){
+        for (City city1 : getCities(country, url, username, password)){
             if (city1.getName().equals(city)) {
                 previousPop = city1.getPopulation();
                 break;
@@ -133,11 +130,11 @@ public class Help {
         return previousPop;
     }
 
-    public static int getMonumentId(){
+    public static int getMonumentId(String url, String username, String password){
         String query = "SELECT * FROM monument";
         int count = 0;
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null) {
                 PreparedStatement ps = connection.prepareStatement(query);
                 ResultSet rs = ps.executeQuery();
@@ -149,12 +146,12 @@ public class Help {
         return count;
     }
 
-    public static Integer getCityId(String city){
+    public static Integer getCityId(String city, String url, String username, String password){
         String query = "SELECT ID, Name " +
                 "FROM city " +
                 "WHERE Name LIKE ?";
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null){
                 PreparedStatement ps = connection.prepareStatement(query);
                 ps.setString(1, city);
@@ -169,14 +166,14 @@ public class Help {
         return null;
     }
 
-    public static List<Monument> getMonuments(){
+    public static List<Monument> getMonuments(String url, String password, String username){
         String query = "SELECT monument.id, monument.name, city.Name, country.Name " +
                 "FROM monument " +
                 "INNER JOIN city ON city.ID = monument.city " +
                 "INNER JOIN country ON country.Code = city.CountryCode";
         List<Monument> monuments = new ArrayList<>();
         try {
-            Connection connection = getConnection();
+            Connection connection = getConnection(url, username, password);
             if (connection != null){
                 PreparedStatement ps = connection.prepareStatement(query);
                 ResultSet rs = ps.executeQuery();
